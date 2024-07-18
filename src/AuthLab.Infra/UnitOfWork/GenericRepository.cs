@@ -8,9 +8,10 @@ public class GenericRepository<T>(AuthLabDbContext context) : IGenericRepository
 {
     private readonly AuthLabDbContext _context = context;
 
-    public async Task<IEnumerable<T>> GetAllAsync()
+    public async Task<IEnumerable<T?>?>? GetAllAsync()
     {
-        return await _context.Set<T>().ToListAsync();
+        var result = await _context.Set<T>().ToListAsync();
+        return result.Count == 0 ? null! : result;
     }
 
     public async Task<T?>? GetByIdAsync(int id)
