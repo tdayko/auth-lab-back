@@ -24,13 +24,15 @@ public class GenericRepository<T>(AuthLabDbContext context) : IGenericRepository
         return entity;
     }
 
-    public T UpdateAsync(T entity)
+    public Task<T?>? UpdateAsync(T entity)
     {
+        if(_context.Set<T>().Any(x => x == entity)) return null!;
         _context.Set<T>().Update(entity);
-        return entity;
+
+        return Task.FromResult(entity)!;
     }
 
-    public async Task<T>? DeleteAsync(int id)   
+    public async Task<T?>? DeleteAsync(int id)   
     {
         var entity = await GetByIdAsync(id)!;
         if (entity == null) return null!;
