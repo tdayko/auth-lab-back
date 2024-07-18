@@ -1,3 +1,6 @@
+
+using System.Linq.Expressions;
+
 using AuthLab.Application.UnitOfWork;
 using AuthLab.Infra.DbContext;
 using Microsoft.EntityFrameworkCore;
@@ -14,9 +17,9 @@ public class GenericRepository<T>(AuthLabDbContext context) : IGenericRepository
         return result.Count == 0 ? null! : result;
     }
 
-    public async Task<T?>? GetByIdAsync(int id)
+    public async Task<T?>? GetByFuncAsync(Expression<Func<T, bool>> expression)
     {
-        return await _context.FindAsync<T>(id);
+        return await _context.Set<T>().FirstOrDefaultAsync(expression);
     }
 
     public async Task<T> AddAsync(T entity)
@@ -25,20 +28,13 @@ public class GenericRepository<T>(AuthLabDbContext context) : IGenericRepository
         return entity;
     }
 
-    public Task<T?>? UpdateAsync(T entity)
+    public void UpdateAsync(T entity)
     {
-        if(_context.Set<T>().Any(x => x == entity)) return null!;
         _context.Set<T>().Update(entity);
-
-        return Task.FromResult(entity)!;
     }
 
-    public async Task<T?>? DeleteAsync(int id)   
+    public void DeleteAsync(T entity)   
     {
-        var entity = await GetByIdAsync(id)!;
-        if (entity == null) return null!;
-
         _context.Set<T>().Remove(entity);
-        return entity;
     }
 }

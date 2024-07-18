@@ -1,10 +1,11 @@
+using System.Linq.Expressions;
 namespace AuthLab.Application.UnitOfWork;
 
 public interface IGenericRepository<T> where T : class
 {
     Task<IEnumerable<T?>?>? GetAllAsync();
-    Task<T?>? GetByIdAsync(int id);
+    Task<T?>? GetByFuncAsync(Expression<Func<T, bool>> expression);
     Task<T> AddAsync(T entity);
-    Task<T?>? UpdateAsync(T entity);
-    Task<T?>? DeleteAsync(int id);
+    void UpdateAsync(T entity);
+    void DeleteAsync(T entity);
 }
