@@ -1,4 +1,4 @@
-using AuthLab.API.Endpoints;
+using AuthLab.Api.Endpoints;
 using AuthLab.Infra;
 
 var builder = WebApplication.CreateBuilder(args);

@@ -1,7 +1,7 @@
 using AuthLab.Application.UnitOfWork;
 using AuthLab.Domain.Entities;
 
-namespace AuthLab.API.Endpoints;
+namespace AuthLab.Api.Endpoints;
 
 public static class UserEndpoints
 {
