@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F9D0B4E2-582F-440C-8334-EB5E96598302}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthLab.API", "src\AuthLab.API\AuthLab.API.csproj", "{3A038415-01F7-47B1-BAE1-5F21E8A96250}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthLab.Api", "src\AuthLab.Api\AuthLab.Api.csproj", "{3A038415-01F7-47B1-BAE1-5F21E8A96250}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthLab.Infra", "src\AuthLab.Infra\AuthLab.Infra.csproj", "{9336943A-6178-43C7-B246-575FC8DA55BE}"
 EndProject
