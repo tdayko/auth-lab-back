@@ -5,7 +5,7 @@ namespace AuthLab.API.Endpoints;
 
 public static class UserEndpoints
 {
-    public static IEndpointRouteBuilder addUserEndpoint(this IEndpointRouteBuilder endpoints)
+    public static IEndpointRouteBuilder AddUserEndpoint(this IEndpointRouteBuilder endpoints)
     {
         var userEndpoint = endpoints.MapGroup("auth-lab/api/users").WithTags("Users");
 
@@ -27,7 +27,7 @@ public static class UserEndpoints
 
         static async Task<IResult> HandleGetUsers(IUnitOfWork<User> unitOfWork)
         {
-            var result = await unitOfWork.Repository().GetAllAsync();
+            var result = await unitOfWork.Repository().GetAllAsync()!;
             return result == null ? Results.NotFound() : Results.Ok(result);
         }
 
@@ -48,7 +48,7 @@ public static class UserEndpoints
 
         static async Task<IResult> HandleDeleteUser(int id, IUnitOfWork<User> unitOfWork)
         {
-            var result = unitOfWork.Repository().DeleteAsync(id)!;
+            var result = await unitOfWork.Repository().DeleteAsync(id)!;
             if(result == null) return Results.NotFound(id);
             
             await unitOfWork.SaveChangesAsync();
