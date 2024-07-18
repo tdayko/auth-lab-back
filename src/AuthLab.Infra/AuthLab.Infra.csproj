@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AuthLab.Domain\AuthLab.Domain.csproj" />
+    <ProjectReference Include="..\AuthLab.Application\AuthLab.Application.csproj" />
   </ItemGroup>
 
 </Project>
