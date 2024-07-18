@@ -3,19 +3,11 @@ using AuthLab.Domain.Entities;
 
 namespace AuthLab.Api.Endpoints;
 
-public static class UserEndpoints
+internal static class UserEndpoints
 {
-    public static IEndpointRouteBuilder AddUserEndpoint(this IEndpointRouteBuilder endpoints)
+    internal static IEndpointRouteBuilder AddUserEndpoint(this IEndpointRouteBuilder endpoints)
     {
         var userEndpoint = endpoints.MapGroup("auth-lab/api/users").WithTags("Users");
-
-        userEndpoint.MapPost("", HandleAddUser)
-            .Produces<User>(StatusCodes.Status201Created)
-            .WithOpenApi(x =>
-            {
-                x.Summary = "Add a User";
-                return x;
-            });
 
         userEndpoint.MapGet("", HandleGetUsers)
             .Produces<IEnumerable<User>>(StatusCodes.Status200OK)
@@ -34,15 +26,6 @@ public static class UserEndpoints
                 return x;
             });
 
-        userEndpoint.MapPut("", HandleUpdateUser)
-            .Produces<User>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status404NotFound)
-            .WithOpenApi(x =>
-            {
-                x.Summary = "Update a User";
-                return x;
-            });
-
         userEndpoint.MapDelete("{id}", HandleDeleteUser)
             .Produces<User>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
@@ -54,14 +37,6 @@ public static class UserEndpoints
 
         #region [privarte methods]
 
-        static async Task<IResult> HandleAddUser(User user, IUnitOfWork<User> unitOfWork)
-        {
-            var result = await unitOfWork.Repository().AddAsync(user);
-            await unitOfWork.SaveChangesAsync();
-
-            return Results.Created($"/auth-lab/api/users/{result.Id}", result);
-        }
-
         static async Task<IResult> HandleGetUsers(IUnitOfWork<User> unitOfWork)
         {
             var result = await unitOfWork.Repository().GetAllAsync()!;
@@ -70,26 +45,18 @@ public static class UserEndpoints
 
         static async Task<IResult> HandleGetUserById(int id, IUnitOfWork<User> unitOfWork)
         {
-            var result = await unitOfWork.Repository().GetByIdAsync(id)!;
+            var result = await unitOfWork.Repository().GetByFuncAsync(x => x.Id == id)!;
             return result == null ? Results.NotFound(id) : Results.Ok(result);
-        }
-
-        static async Task<IResult> HandleUpdateUser(User user, IUnitOfWork<User> unitOfWork)
-        {
-            var result = unitOfWork.Repository().UpdateAsync(user);
-            if (result == null) return Results.NotFound(user);
-
-            await unitOfWork.SaveChangesAsync();
-            return Results.Ok(user);
         }
 
         static async Task<IResult> HandleDeleteUser(int id, IUnitOfWork<User> unitOfWork)
         {
-            var result = await unitOfWork.Repository().DeleteAsync(id)!;
-            if (result == null) return Results.NotFound(new { Id = id });
+            var user = await unitOfWork.Repository().GetByFuncAsync(x => x.Id == id)!;
+            if (user == null) return Results.NotFound(id);
 
+            unitOfWork.Repository().DeleteAsync(user);
             await unitOfWork.SaveChangesAsync();
-            return Results.Ok(result);
+            return Results.Ok();
         }
 
         #endregion
