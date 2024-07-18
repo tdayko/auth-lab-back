@@ -1,4 +1,6 @@
 using AuthLab.Application.UnitOfWork;
+using AuthLab.Application.UnitOfWork.Requests;
+using AuthLab.Application.UnitOfWork.Responses;
 using AuthLab.Domain.Entities;
 
 namespace AuthLab.Api.Endpoints;
@@ -39,10 +41,10 @@ internal static class AuthenticationEndpoint
 
         await unitOfWork.Repository().AddAsync(result);
         await unitOfWork.SaveChangesAsync();
-        return Results.Created($"/auth-lab/api/users/{result.Id}", result);
+        return Results.Created($"/auth-lab/api/users/{result.Id}", new UserResponse(result.Id, result.Email, result.Username));
     }
 
-    static async Task<IResult> HandleLogin(User user, IUnitOfWork<User> unitOfWork)
+    static async Task<IResult> HandleLogin(LoginRequest user, IUnitOfWork<User> unitOfWork)
     {
         var result = await unitOfWork.Repository().GetByFuncAsync(x => x.Email == user.Email)! ?? throw new Exception("User not found");
         return BCrypt.Net.BCrypt.Verify(user.Password, result.Password) ? Results.Ok() : Results.Unauthorized();
