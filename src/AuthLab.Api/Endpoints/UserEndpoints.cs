@@ -1,5 +1,4 @@
 using AuthLab.Application.UnitOfWork;
-using AuthLab.Application.UnitOfWork.Requests;
 using AuthLab.Application.UnitOfWork.Responses;
 using AuthLab.Domain.Entities;
 
@@ -17,7 +16,8 @@ internal static class UserEndpoints
             {
                 x.Summary = "Get all Users";
                 return x;
-            });
+            })
+            .RequireAuthorization();
 
         userEndpoint.MapGet("{id}", HandleGetUserById)
             .Produces<User>(StatusCodes.Status200OK)
@@ -26,7 +26,8 @@ internal static class UserEndpoints
             {
                 x.Summary = "Get a User by Id";
                 return x;
-            });
+            })
+            .RequireAuthorization();
 
         userEndpoint.MapDelete("{id}", HandleDeleteUser)
             .Produces<User>(StatusCodes.Status200OK)
@@ -35,7 +36,8 @@ internal static class UserEndpoints
             {
                 x.Summary = "Delete a User";
                 return x;
-            });
+            })
+            .RequireAuthorization();
 
         #region [privarte methods]
 
@@ -50,7 +52,7 @@ internal static class UserEndpoints
             var result = await unitOfWork.Repository().GetByFuncAsync(x => x.Id == id)!;
             return result == null ? Results.NotFound(new { id }) : Results.Ok(new UserResponse(result.Id, result.Email, result.Username));
         }
-
+        
         static async Task<IResult> HandleDeleteUser(int id, IUnitOfWork<User> unitOfWork)
         {
             var user = await unitOfWork.Repository().GetByFuncAsync(x => x.Id == id)!;
