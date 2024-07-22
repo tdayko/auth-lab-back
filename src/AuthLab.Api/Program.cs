@@ -67,13 +67,16 @@ void ConfigureAuthentication(WebApplicationBuilder builder)
             };
         }
     );
+
+    builder.Services.AddCors();
 }
 
 void ConfigureMiddleware(WebApplication app)
 {
+    app.UseCors(op => op.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+    app.UseSwagger();
     app.UseAuthentication();
     app.UseAuthorization();
-    app.UseSwagger();
     app.UseSwaggerUI(x => x.SwaggerEndpoint("/swagger/v1/swagger.json", "AuthLab v1"));
     app.UseHttpsRedirection();
 }

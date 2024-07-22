@@ -10,7 +10,7 @@ internal static class AuthenticationEndpoint
 {
     internal static IEndpointRouteBuilder AddAuthenticationEndpoint(this IEndpointRouteBuilder endpoints)
     {
-        var authenticationEndpoint = endpoints.MapGroup("auth-lab/api/authentication").WithTags("Authentication");
+        var authenticationEndpoint = endpoints.MapGroup("auth-lab/api/auth").WithTags("Authentication");
 
         authenticationEndpoint.MapPost("register", HandleRegister)
             .Produces<User>(StatusCodes.Status201Created)
@@ -42,16 +42,15 @@ internal static class AuthenticationEndpoint
 
         await unitOfWork.Repository().AddAsync(user);
         await unitOfWork.SaveChangesAsync();
-        return Results.Created($"/auth-lab/api/users/{user.Id}", new UserResponse(user.Id, user.Email, user.Username));
+        return Results.Created($"/auth-lab/api/users/{user.Id}", new { token = jwtService.CreateToken(user) });
     }
 
     static async Task<IResult> HandleLogin(LoginRequest loginRequest, IUnitOfWork<User> unitOfWork, IJwtService jwtService)
     {
         var user = await unitOfWork.Repository().GetByFuncAsync(x => x.Email == loginRequest.Email)! ?? throw new Exception("User not found");
-        var jwtKey = jwtService.CreateToken(user);
 
         return BCrypt.Net.BCrypt.Verify(loginRequest.Password, user.Password)
-        ? Results.Ok(new { token = jwtKey })
+        ? Results.Ok(new { token = jwtService.CreateToken(user) })
         : Results.Unauthorized();
     }
 
