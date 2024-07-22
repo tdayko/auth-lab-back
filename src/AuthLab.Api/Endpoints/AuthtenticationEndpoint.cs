@@ -1,3 +1,4 @@
+using AuthLab.Application.IJwtService;
 using AuthLab.Application.UnitOfWork;
 using AuthLab.Application.UnitOfWork.Requests;
 using AuthLab.Application.UnitOfWork.Responses;
@@ -14,7 +15,7 @@ internal static class AuthenticationEndpoint
         authenticationEndpoint.MapPost("register", HandleRegister)
             .Produces<User>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest)
-            .WithOpenApi(x => 
+            .WithOpenApi(x =>
             {
                 x.Summary = "Register";
                 return x;
@@ -34,20 +35,24 @@ internal static class AuthenticationEndpoint
 
     #region [privarte methods]
 
-    static async Task<IResult> HandleRegister(User user, IUnitOfWork<User> unitOfWork)
+    static async Task<IResult> HandleRegister(User userRequest, IUnitOfWork<User> unitOfWork, IJwtService jwtService)
     {
-        var passwordHash = BCrypt.Net.BCrypt.HashPassword(user.Password);
-        var result = new User(user.Email, user.Username, passwordHash);
+        var passwordHash = BCrypt.Net.BCrypt.HashPassword(userRequest.Password);
+        var user = new User(userRequest.Email, userRequest.Username, passwordHash);
 
-        await unitOfWork.Repository().AddAsync(result);
+        await unitOfWork.Repository().AddAsync(user);
         await unitOfWork.SaveChangesAsync();
-        return Results.Created($"/auth-lab/api/users/{result.Id}", new UserResponse(result.Id, result.Email, result.Username));
+        return Results.Created($"/auth-lab/api/users/{user.Id}", new UserResponse(user.Id, user.Email, user.Username));
     }
 
-    static async Task<IResult> HandleLogin(LoginRequest user, IUnitOfWork<User> unitOfWork)
+    static async Task<IResult> HandleLogin(LoginRequest loginRequest, IUnitOfWork<User> unitOfWork, IJwtService jwtService)
     {
-        var result = await unitOfWork.Repository().GetByFuncAsync(x => x.Email == user.Email)! ?? throw new Exception("User not found");
-        return BCrypt.Net.BCrypt.Verify(user.Password, result.Password) ? Results.Ok() : Results.Unauthorized();
+        var user = await unitOfWork.Repository().GetByFuncAsync(x => x.Email == loginRequest.Email)! ?? throw new Exception("User not found");
+        var jwtKey = jwtService.CreateToken(user);
+
+        return BCrypt.Net.BCrypt.Verify(loginRequest.Password, user.Password)
+        ? Results.Ok(new { token = jwtKey })
+        : Results.Unauthorized();
     }
 
     #endregion
